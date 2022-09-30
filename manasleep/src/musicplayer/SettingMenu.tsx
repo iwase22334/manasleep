@@ -22,7 +22,7 @@ export const PlayerDrawer = () => {
         if (typeof newValue === 'number') {
             let newPlayerState = generateFromDuration(playerState, newValue * 60);
             newPlayerState.position = 0;
-            invoke("cmd_set_duration", { volume: newPlayerState.duration });
+            invoke("cmd_set_duration", { duration: newPlayerState.duration });
             invoke("cmd_set_position", { position: newPlayerState.position });
             setPlayerState(newPlayerState);
         }
