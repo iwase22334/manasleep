@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { invoke } from "@tauri-apps/api";
 import { styled, useTheme } from '@mui/material/styles';
 import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
 import Box from '@mui/material/Box';
@@ -18,7 +19,7 @@ import Fab from '@mui/material/Fab'
 import VolumeUpRounded from '@mui/icons-material/VolumeUpRounded';
 import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
 
-import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition} from './PlayerContext';
+import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition, generateFromVolume} from './PlayerContext';
 
 import jacket from '../assets/jacket.png'
 
@@ -65,6 +66,31 @@ export default function MusicPlayerSlider() {
     return `${minute}:${secondLeft < 10 ? `0${secondLeft}` : secondLeft}`;
   }
 
+  const handleVolumeChange = (event: Event, newValue: number | number[]) => {
+      if (typeof newValue === 'number') {
+          let newPlayerState = generateFromVolume(playerState, newValue);
+          invoke("cmd_set_volume", { volume: newPlayerState.volume });
+          setPlayerState(newPlayerState);
+      }
+  };
+
+  const handleLoopedChange = () => {
+      let newLooped = !playerState.looped;
+      invoke("cmd_set_looping", { looping: newLooped });
+      setPlayerState(generateFromLooped(playerState, newLooped));
+  };
+
+  const handlePausedChange = () => {
+      let newPaused = !playerState.paused;
+      invoke("cmd_set_playing", { playing: !newPaused });
+      setPlayerState(generateFromPaused(playerState, newPaused));
+  };
+
+  const handleBackPushed = () => {
+      invoke("cmd_set_position", { position: 0 });
+      setPlayerState(generateFromPosition(playerState, 0));
+  };
+
   const mainIconColor = '#fff' ;
   const lightIconColor =  'rgba(0,0,0,0.4)';
 
@@ -93,7 +119,6 @@ export default function MusicPlayerSlider() {
           step={1}
           max={playerState.duration}
           color="primary"
-          onChange={(_, value) => {setPlayerState(generateFromPosition(playerState, value as number))}}
           sx={{ '& .MuiSlider-thumb': { width: 8, height: 8, }, }}
         />
         <Box
@@ -121,13 +146,15 @@ export default function MusicPlayerSlider() {
           }}
         >
           <IconButton aria-label="previous song">
-            <FastRewindRounded fontSize="large" htmlColor={mainIconColor} onClick={
-                () => {setPlayerState(generateFromPosition(playerState, 0))}
-                }/>
+            <FastRewindRounded
+                fontSize="large"
+                htmlColor={mainIconColor}
+                onClick={handleBackPushed}
+                />
           </IconButton>
           <IconButton
             aria-label={playerState.paused ? 'play' : 'pause'}
-            onClick={() => setPlayerState(generateFromPaused(playerState, !playerState.paused))}
+            onClick={handlePausedChange}
           >
             {playerState.paused ? (
               <PlayArrowRounded sx={{ fontSize: '3rem' }} htmlColor={mainIconColor}
@@ -138,7 +165,7 @@ export default function MusicPlayerSlider() {
           </IconButton>
           <IconButton aria-label="loop"
               color={playerState.looped ? 'secondary' : 'default'  }
-              onClick={() => {setPlayerState(generateFromLooped(playerState, !playerState.looped))}}
+              onClick={handleLoopedChange}
             >
             <AllInclusiveIcon />
           </IconButton>
@@ -149,6 +176,7 @@ export default function MusicPlayerSlider() {
           <Slider
             aria-label="Volume"
             defaultValue={30}
+            onChange={handleVolumeChange}
             sx={{
               '& .MuiSlider-track': {
                 border: 'none',

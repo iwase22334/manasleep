@@ -2,6 +2,7 @@ use crate::voice_store;
 
 use rand::prelude::*;
 use rodio::{OutputStream, OutputStreamHandle, Sink};
+use std::sync::mpsc;
 
 pub enum SoundControl {
     Play,
@@ -9,7 +10,9 @@ pub enum SoundControl {
     Quit,
 }
 
-pub fn start(rx: std::sync::mpsc::Receiver<SoundControl>) -> () {
+pub fn start() -> mpsc::SyncSender<SoundControl> {
+    let (tx, rx) = mpsc::sync_channel::<SoundControl>(1);
+
     let voice_store = voice_store::VoiceStore::new();
 
     let mut rng = rand::thread_rng();
@@ -42,4 +45,6 @@ pub fn start(rx: std::sync::mpsc::Receiver<SoundControl>) -> () {
         sink.sleep_until_end();
         println!("thread exit");
     });
+
+    return tx;
 }

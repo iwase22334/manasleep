@@ -10,6 +10,7 @@ type PlayerState = {
     drawed: boolean,
     duration: number,
     position: number,
+    volume: number,
     paused: boolean
 }
 
@@ -23,6 +24,7 @@ const defaultState = {
     drawed: false,
     duration: 1800, // second
     position: 0,
+    volume: 0,
     paused: true
 }
 
@@ -47,6 +49,12 @@ export const generateFromDuration = (state: PlayerState, value: number) => {
 export const generateFromPosition = (state: PlayerState, value: number) => {
     let newPlayerState = { ...state };
     newPlayerState.position = value;
+    return newPlayerState;
+}
+
+export const generateFromVolume = (state: PlayerState, value: number) => {
+    let newPlayerState = { ...state };
+    newPlayerState.volume = value;
     return newPlayerState;
 }
 

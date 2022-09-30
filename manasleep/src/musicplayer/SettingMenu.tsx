@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { invoke } from "@tauri-apps/api";
 import { useContext } from "react";
 import { styled } from '@mui/material/styles';
 import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
@@ -14,10 +15,6 @@ import MuiInput from '@mui/material/Input';
 import VolumeUp from '@mui/icons-material/VolumeUp';
 import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition} from './PlayerContext';
 
-const Input = styled(MuiInput)`
-  width: 42px;
-`;
-
 export const PlayerDrawer = () => {
     const {playerState, setPlayerState} = useContext(PlayerContext);
 
@@ -25,12 +22,16 @@ export const PlayerDrawer = () => {
         if (typeof newValue === 'number') {
             let newPlayerState = generateFromDuration(playerState, newValue * 60);
             newPlayerState.position = 0;
+            invoke("cmd_set_duration", { volume: newPlayerState.duration });
+            invoke("cmd_set_position", { position: newPlayerState.position });
             setPlayerState(newPlayerState);
         }
     };
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setPlayerState(generateFromLooped(playerState, event.target.checked))
+    const handleLoopedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        let newLooped = event.target.checked;
+        invoke("cmd_set_looping", { looping: newLooped });
+        setPlayerState(generateFromLooped(playerState, newLooped));
     };
 
     return (
@@ -57,7 +58,7 @@ export const PlayerDrawer = () => {
             size="small"
             disabled={playerState.looped ? true : false}
             aria-label="duration"
-            defaultValue={30}
+            defaultValue={ (playerState.duration / 60) }
             valueLabelDisplay="auto"
             onChange={handleSliderChange}
             step={5}
@@ -71,7 +72,7 @@ export const PlayerDrawer = () => {
           value="end"
           control={<Checkbox
               checked={playerState.looped}
-              onChange={handleChange}
+              onChange={handleLoopedChange}
               inputProps={{ 'aria-label': 'controlled' }}
               />}
           label="ループ再生"
