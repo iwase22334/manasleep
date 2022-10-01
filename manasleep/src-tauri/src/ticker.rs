@@ -11,39 +11,109 @@ pub enum TickerControl {
     Volume(u32),
 }
 
-pub fn start(sound_control: mpsc::SyncSender<SoundControl>) -> mpsc::SyncSender<TickerControl>{
+pub enum TickerStateNotice {
+    Stopped,
+    PositionUpdate(u32),
+}
+
+
+pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
+    -> (mpsc::SyncSender<TickerControl>, mpsc::Receiver<TickerStateNotice>) {
+
     let (ticker_control_tx, ticker_control_rx)
         = mpsc::sync_channel::<TickerControl>(1);
 
-    let active_duration = Duration::from_millis(1000 * 60 * 30);
-    let tick_duration = Duration::from_millis(10000);
-    let mut spend = Duration::from_millis(0);
+    let (state_notice_tx, state_notice_rx)
+        = mpsc::sync_channel::<TickerStateNotice>(1);
+
+    let mut active_duration = Duration::from_millis(1000 * 60 * 30);
+    let play_duration = Duration::from_millis(10000);
+    let tick_duration = Duration::from_millis(1000);
+    let mut position = Duration::from_millis(0);
+    let mut play_position = Duration::from_millis(0);
+
+    let mut playing: bool = false;
+    let mut looping: bool = false;
 
     std::thread::spawn(move || {
-        while spend + tick_duration <= active_duration {
+        loop {
             match ticker_control_rx.recv_timeout(tick_duration) {
                 Ok(msg) => {
                     match msg {
-                        TickerControl::Playing(b) => { println!("recv Playing {:?}", b) },
-                        TickerControl::Looping(b) => { println!("recv Looping {:?}", b) },
-                        TickerControl::Duration(n) => { println!("recv Duration {:?}", n) },
-                        TickerControl::Position(n) => { println!("recv Position {:?}", n) },
-                        TickerControl::Volume(n) => { println!("recv Volume {:?}", n) },
+                        TickerControl::Playing(b) => {
+                            println!("recv Playing {:?}", b);
+                            playing = b;
+                            continue;
+                        },
+
+                        TickerControl::Looping(b) => {
+                            println!("recv Looping {:?}", b);
+                            looping = b;
+                            continue;
+                        },
+
+                        TickerControl::Duration(n) => {
+                            println!("recv Duration {:?}", n);
+                            active_duration = Duration::from_secs(n.into());
+                            continue;
+                        },
+
+                        TickerControl::Position(n) => {
+                            println!("recv Position {:?}", n);
+                            position = Duration::from_secs(n.into());
+                            play_position = Duration::from_secs(0);
+                            continue;
+                        },
+
+                        TickerControl::Volume(n) => {
+                            println!("recv Volume {:?}", n);
+                            sound_control.send(SoundControl::Volume(n)).expect("Failed to send volume");
+                            continue;
+                        },
                     }
                 },
-                Err(err) if err == Timeout => {},
+                Err(err) if err == Timeout => {
+                },
                 Err(err) if err == Disconnected => { panic!("disconnected") }
                 Err(_) => { panic!("Unknown error") }
             }
 
-            sound_control.send(SoundControl::Play).expect("Failed to send");
-            spend += tick_duration;
+            if playing && !looping {
+                position += tick_duration;
+
+                if position >= active_duration {
+                    playing = false;
+                    state_notice_tx.try_send(TickerStateNotice::Stopped)
+                        .unwrap_or_else(|_| {println!("Failed to try_send Stopped")});
+                }
+            }
+
+            if playing {
+                play_position += tick_duration;
+                state_notice_tx.try_send(
+                    TickerStateNotice::PositionUpdate(
+                        play_position.as_secs().try_into().unwrap()))
+                            .unwrap_or_else(|_| {println!("Failed to try_send PositionUpdate")});
+
+                if play_position >= play_duration {
+                    sound_control.send(SoundControl::Play).expect("Failed to send play");
+                    play_position = Duration::from_millis(0);
+                }
+            }
+
+            print!(" active_duration {:?}", active_duration);
+            print!(" play_duration {:?}", play_duration);
+            print!(" tick_duration {:?}", tick_duration);
+            print!(" position {:?}", position);
+            print!(" play_position {:?}", play_position);
+            print!(" playing {:?}", playing);
+            println!(" looping {:?}", looping);
         }
 
-        sound_control.send(SoundControl::Quit).expect("Failed to send");
+        sound_control.send(SoundControl::Quit).expect("Failed to send quit");
     });
 
-    return ticker_control_tx;
+    return (ticker_control_tx, state_notice_rx);
 }
 
 pub fn set_playing(tx: &std::sync::mpsc::SyncSender<TickerControl>, playing: bool) {

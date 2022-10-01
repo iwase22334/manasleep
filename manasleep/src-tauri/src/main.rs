@@ -10,7 +10,7 @@ mod ticker;
 use std::sync::mpsc;
 
 use crate::sound_coordinator::{SoundControl};
-use crate::ticker::{TickerControl};
+use crate::ticker::{TickerControl, TickerStateNotice};
 
 #[tauri::command]
 fn cmd_set_playing(playing: bool, tx: tauri::State<mpsc::SyncSender<TickerControl>>) {
@@ -39,7 +39,25 @@ fn cmd_set_volume(volume: u32, tx: tauri::State<mpsc::SyncSender<TickerControl>>
 
 fn main() {
     let sound_coordinator_tx : mpsc::SyncSender<SoundControl> = sound_coordinator::start();
-    let ticker_control_tx : mpsc::SyncSender<TickerControl> = ticker::start(sound_coordinator_tx.clone());
+
+    let (ticker_control_tx, state_notice_rx)
+        : (mpsc::SyncSender<TickerControl>, mpsc::Receiver<TickerStateNotice>)
+           = ticker::start(sound_coordinator_tx.clone());
+
+    std::thread::spawn(move || {
+        loop {
+            match state_notice_rx.recv() {
+                Ok(msg) => {
+                    match msg {
+                        TickerStateNotice::Stopped => { println!("Main: stopped"); },
+                        TickerStateNotice::PositionUpdate(n) => { println!("Main: position {:?}", n); },
+                    }
+                },
+
+                Err(_) => {panic!("Main: Failed to receive");}
+            }
+        }
+    });
 
     tauri::Builder::default()
         .manage(sound_coordinator_tx)
