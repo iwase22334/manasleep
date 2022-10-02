@@ -8,14 +8,12 @@ pub enum TickerControl {
     Looping(bool),
     Duration(u32),
     Position(u32),
-    Volume(u32),
 }
 
 pub enum TickerStateNotice {
     Stopped,
     PositionUpdate(u32),
 }
-
 
 pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
     -> (mpsc::SyncSender<TickerControl>, mpsc::Receiver<TickerStateNotice>) {
@@ -64,12 +62,6 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
                             play_position = Duration::from_secs(0);
                             continue;
                         },
-
-                        TickerControl::Volume(n) => {
-                            println!("recv Volume {:?}", n);
-                            sound_control.send(SoundControl::Volume(n)).expect("Failed to send volume");
-                            continue;
-                        },
                     }
                 },
                 Err(err) if err == Timeout => {
@@ -78,24 +70,27 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
                 Err(_) => { panic!("Unknown error") }
             }
 
-            if playing && !looping {
+            if playing {
                 position += tick_duration;
 
-                if position >= active_duration {
-                    playing = false;
-                    state_notice_tx.try_send(TickerStateNotice::Stopped)
-                        .unwrap_or_else(|_| {println!("Failed to try_send Stopped")});
+                if position > active_duration {
+                    if !looping {
+                        playing = false;
+                        state_notice_tx.try_send(TickerStateNotice::Stopped)
+                            .unwrap_or_else(|_| {println!("Failed to try_send Stopped")});
+                    } else {
+                        position = Duration::from_millis(0);
+                    }
                 }
-            }
 
-            if playing {
                 play_position += tick_duration;
+
                 state_notice_tx.try_send(
                     TickerStateNotice::PositionUpdate(
                         position.as_secs().try_into().unwrap()))
                             .unwrap_or_else(|_| {println!("Failed to try_send PositionUpdate")});
 
-                if play_position > play_duration {
+                if play_position >= play_duration {
                     sound_control.send(SoundControl::Play).expect("Failed to send play");
                     play_position = Duration::from_millis(0);
                 }
@@ -130,8 +125,4 @@ pub fn set_duration(tx: &std::sync::mpsc::SyncSender<TickerControl>, duration: u
 
 pub fn set_position(tx: &std::sync::mpsc::SyncSender<TickerControl>, position: u32) {
     tx.send(TickerControl::Position(position)).unwrap();
-}
-
-pub fn set_volume(tx: &std::sync::mpsc::SyncSender<TickerControl>, volume: u32) {
-    tx.send(TickerControl::Volume(volume)).unwrap();
 }
