@@ -1,0 +1,10 @@
+{
+  version: 1,
+  mediaFileName: 'sample-alpha.mkv',
+  cutSegments: [
+    {
+      start: 3.265762,
+      name: '',
+    },
+  ],
+}
