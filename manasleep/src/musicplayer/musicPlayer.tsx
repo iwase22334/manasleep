@@ -121,7 +121,7 @@ export default function MusicPlayerSlider() {
               COEIROINK:MANA
             </Typography>
             <Typography noWrap>
-              <b>■■■■■■■■■■■■■■■</b>
+              <b>MANAさんSleep</b>
             </Typography>
           </Box>
         </Box>
