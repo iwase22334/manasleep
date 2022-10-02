@@ -96,6 +96,7 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
                 }
             }
 
+            print!("ticker:");
             print!(" active_duration {:?}", active_duration);
             print!(" play_duration {:?}", play_duration);
             print!(" tick_duration {:?}", tick_duration);

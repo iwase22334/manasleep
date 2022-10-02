@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "manasleep",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
@@ -55,10 +55,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
-        "resizable": true,
+        "height": 480,
+        "resizable": false,
         "title": "manasleep",
-        "width": 800
+        "width": 640
       }
     ]
   }

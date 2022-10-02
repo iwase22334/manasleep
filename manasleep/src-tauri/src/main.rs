@@ -38,6 +38,32 @@ fn cmd_set_volume(volume: u32, tx: tauri::State<mpsc::SyncSender<SoundControl>>)
     tx.send(SoundControl::Volume(volume)).unwrap_or_else(|_| println!("Failed to send volume"));
 }
 
+fn start_emitter(rx: mpsc::Receiver<TickerStateNotice>, app_handle: tauri::AppHandle) {
+    std::thread::spawn(move || loop {
+        match rx.recv() {
+            Ok(msg) => {
+                match msg {
+                    TickerStateNotice::Stopped => {
+                        println!("Main: stopped");
+                        app_handle
+                            .emit_all("player-state-stopped", true)
+                            .unwrap();
+                    },
+
+                    TickerStateNotice::PositionUpdate(n) => {
+                        app_handle
+                            .emit_all("player-state-position", n)
+                            .unwrap();
+                        println!("Main: position {:?}", n);
+                    },
+                }
+            },
+
+            Err(_) => {panic!("Main: Failed to receive");}
+        }
+    });
+}
+
 fn main() {
     let sound_coordinator_tx : mpsc::SyncSender<SoundControl> = sound_coordinator::start();
 
@@ -48,30 +74,7 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let app_handle = app.app_handle();
-            std::thread::spawn(move || loop {
-
-                match state_notice_rx.recv() {
-                    Ok(msg) => {
-                        match msg {
-                            TickerStateNotice::Stopped => {
-                                println!("Main: stopped");
-                                app_handle
-                                    .emit_all("player-state-stopped", true)
-                                    .unwrap();
-                            },
-
-                            TickerStateNotice::PositionUpdate(n) => {
-                                app_handle
-                                    .emit_all("player-state-position", n)
-                                    .unwrap();
-                                println!("Main: position {:?}", n);
-                            },
-                        }
-                    },
-
-                    Err(_) => {panic!("Main: Failed to receive");}
-                }
-            });
+            start_emitter(state_notice_rx, app_handle);
 
             #[cfg(debug_assertions)] // only include this code on debug builds
             {
