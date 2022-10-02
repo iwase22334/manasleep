@@ -5,7 +5,7 @@ type Props = {
     children: ReactNode
 }
 
-type PlayerState = {
+export type PlayerState = {
     looped: boolean,
     drawed: boolean,
     duration: number,
@@ -14,9 +14,17 @@ type PlayerState = {
     paused: boolean
 }
 
+export type ActionType =
+| {type: "looped", payload: boolean}
+| {type: "drawed", payload: boolean}
+| {type: "duration", payload: number}
+| {type: "position", payload: number}
+| {type: "volume", payload: number}
+| {type: "paused", payload: boolean};
+
 type PlayerStateContext = {
     playerState: PlayerState,
-    setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>
+    playerStateDispatch: React.Dispatch<ActionType>
 }
 
 const defaultState = {
@@ -64,13 +72,34 @@ export const generateFromPaused = (state: PlayerState, value: boolean) => {
     return newPlayerState;
 }
 
+export const reducerFunction = (state: PlayerState, action: ActionType) => {
+    console.debug(state)
+        console.debug(action)
+        switch (action.type) {
+            case 'looped':
+                return {...state, looped: action.payload };
+            case 'drawed':
+                return {...state, drawed: action.payload };
+            case 'duration':
+                return {...state, duration: action.payload };
+            case 'position':
+                return {...state, position: action.payload };
+            case 'volume':
+                return {...state, volume: action.payload };
+            case 'paused':
+                return {...state, paused: action.payload };
+            default:
+                return state;
+        }
+};
+
 //export const PlayerContext = createContext([defaultContext, (context: PlayerContext) => {}]);
 export const PlayerContext = createContext({} as PlayerStateContext);
 
 export const ContextProvider: React.FC<Props> = (props) => {
-    const [playerState, setPlayerState] = useState(defaultState);
+    const [playerState, playerStateDispatch] = React.useReducer(reducerFunction, defaultState);
     return(
-        <PlayerContext.Provider value={{playerState, setPlayerState}}>
+        <PlayerContext.Provider value={{playerState, playerStateDispatch}}>
             {props.children}
         </PlayerContext.Provider>
     )

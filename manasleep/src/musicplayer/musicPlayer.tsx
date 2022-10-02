@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { invoke } from "@tauri-apps/api";
+import { listen } from '@tauri-apps/api/event'
 import { styled, useTheme } from '@mui/material/styles';
 import AllInclusiveIcon from '@mui/icons-material/AllInclusive';
 import Box from '@mui/material/Box';
@@ -19,7 +20,7 @@ import Fab from '@mui/material/Fab'
 import VolumeUpRounded from '@mui/icons-material/VolumeUpRounded';
 import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
 
-import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition, generateFromVolume} from './PlayerContext';
+import {PlayerState, PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition, generateFromVolume} from './PlayerContext';
 
 import jacket from '../assets/jacket.png'
 
@@ -58,7 +59,10 @@ const TinyText = styled(Typography)({
 
 export default function MusicPlayerSlider() {
   const theme = useTheme();
-  const {playerState, setPlayerState} = React.useContext(PlayerContext);
+  const {playerState, playerStateDispatch} = React.useContext(PlayerContext);
+
+  const mainIconColor = '#fff' ;
+  const lightIconColor =  'rgba(0,0,0,0.4)';
 
   function formatDuration(value: number) {
     const minute = Math.floor(value / 60);
@@ -68,31 +72,42 @@ export default function MusicPlayerSlider() {
 
   const handleVolumeChange = (event: Event, newValue: number | number[]) => {
       if (typeof newValue === 'number') {
-          let newPlayerState = generateFromVolume(playerState, newValue);
-          invoke("cmd_set_volume", { volume: newPlayerState.volume });
-          setPlayerState(newPlayerState);
+          invoke("cmd_set_volume", { volume: newValue });
+          playerStateDispatch({ type: 'volume', payload: newValue })
       }
   };
 
   const handleLoopedChange = () => {
       let newLooped = !playerState.looped;
       invoke("cmd_set_looping", { looping: newLooped });
-      setPlayerState(generateFromLooped(playerState, newLooped));
+      playerStateDispatch({ type: 'looped', payload: newLooped })
   };
 
   const handlePausedChange = () => {
       let newPaused = !playerState.paused;
       invoke("cmd_set_playing", { playing: !newPaused });
-      setPlayerState(generateFromPaused(playerState, newPaused));
+      playerStateDispatch({ type: 'paused', payload: newPaused })
   };
 
   const handleBackPushed = () => {
       invoke("cmd_set_position", { position: 0 });
-      setPlayerState(generateFromPosition(playerState, 0));
+      playerStateDispatch({ type: 'position', payload: 0 })
   };
 
-  const mainIconColor = '#fff' ;
-  const lightIconColor =  'rgba(0,0,0,0.4)';
+  React.useEffect(() => {
+        const _unlisten_stopped = listen('player-state-stopped', (event) => {
+            console.log(event)
+            playerStateDispatch({ type: 'paused', payload: event.payload as boolean })
+        });
+
+        const _unlisten_position = listen('player-state-position', (event) => {
+            console.debug(event)
+            if (typeof event.payload === "number") {
+                playerStateDispatch({ type: 'position', payload: event.payload as number })
+            }
+        });
+
+  }, []);
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -195,7 +210,7 @@ export default function MusicPlayerSlider() {
           color="primary"
           size="small"
           aria-label="edit"
-          onClick={ () => {setPlayerState(generateFromDrawed(playerState, true))} }
+          onClick={ () => {playerStateDispatch({ type: 'drawed', payload: true })} }
           sx={{ 
               position: 'absolute',
               top: 16,

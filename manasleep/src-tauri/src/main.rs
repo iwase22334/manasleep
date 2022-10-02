@@ -7,6 +7,7 @@ mod voice_store;
 mod sound_coordinator;
 mod ticker;
 
+use tauri::Manager;
 use std::sync::mpsc;
 
 use crate::sound_coordinator::{SoundControl};
@@ -33,8 +34,8 @@ fn cmd_set_position(position: u32, tx: tauri::State<mpsc::SyncSender<TickerContr
 }
 
 #[tauri::command]
-fn cmd_set_volume(volume: u32, tx: tauri::State<mpsc::SyncSender<TickerControl>>) {
-    ticker::set_volume(&tx, volume);
+fn cmd_set_volume(volume: u32, tx: tauri::State<mpsc::SyncSender<SoundControl>>) {
+    tx.send(SoundControl::Volume(volume)).unwrap_or_else(|_| println!("Failed to send volume"));
 }
 
 fn main() {
@@ -44,22 +45,43 @@ fn main() {
         : (mpsc::SyncSender<TickerControl>, mpsc::Receiver<TickerStateNotice>)
            = ticker::start(sound_coordinator_tx.clone());
 
-    std::thread::spawn(move || {
-        loop {
-            match state_notice_rx.recv() {
-                Ok(msg) => {
-                    match msg {
-                        TickerStateNotice::Stopped => { println!("Main: stopped"); },
-                        TickerStateNotice::PositionUpdate(n) => { println!("Main: position {:?}", n); },
-                    }
-                },
-
-                Err(_) => {panic!("Main: Failed to receive");}
-            }
-        }
-    });
-
     tauri::Builder::default()
+        .setup(|app| {
+            let app_handle = app.app_handle();
+            std::thread::spawn(move || loop {
+
+                match state_notice_rx.recv() {
+                    Ok(msg) => {
+                        match msg {
+                            TickerStateNotice::Stopped => {
+                                println!("Main: stopped");
+                                app_handle
+                                    .emit_all("player-state-stopped", true)
+                                    .unwrap();
+                            },
+
+                            TickerStateNotice::PositionUpdate(n) => {
+                                app_handle
+                                    .emit_all("player-state-position", n)
+                                    .unwrap();
+                                println!("Main: position {:?}", n);
+                            },
+                        }
+                    },
+
+                    Err(_) => {panic!("Main: Failed to receive");}
+                }
+            });
+
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                let window = app.get_window("main").unwrap();
+                window.open_devtools();
+                window.close_devtools();
+            }
+
+            Ok(())
+        })
         .manage(sound_coordinator_tx)
         .manage(ticker_control_tx)
         .invoke_handler(

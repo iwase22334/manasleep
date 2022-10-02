@@ -92,10 +92,10 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
                 play_position += tick_duration;
                 state_notice_tx.try_send(
                     TickerStateNotice::PositionUpdate(
-                        play_position.as_secs().try_into().unwrap()))
+                        position.as_secs().try_into().unwrap()))
                             .unwrap_or_else(|_| {println!("Failed to try_send PositionUpdate")});
 
-                if play_position >= play_duration {
+                if play_position > play_duration {
                     sound_control.send(SoundControl::Play).expect("Failed to send play");
                     play_position = Duration::from_millis(0);
                 }

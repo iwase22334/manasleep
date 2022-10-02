@@ -16,22 +16,21 @@ import VolumeUp from '@mui/icons-material/VolumeUp';
 import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition} from './PlayerContext';
 
 export const PlayerDrawer = () => {
-    const {playerState, setPlayerState} = useContext(PlayerContext);
+    const {playerState, playerStateDispatch} = React.useContext(PlayerContext);
 
     const handleSliderChange = (event: Event, newValue: number | number[]) => {
         if (typeof newValue === 'number') {
-            let newPlayerState = generateFromDuration(playerState, newValue * 60);
-            newPlayerState.position = 0;
-            invoke("cmd_set_duration", { duration: newPlayerState.duration });
-            invoke("cmd_set_position", { position: newPlayerState.position });
-            setPlayerState(newPlayerState);
+            invoke("cmd_set_duration", { duration: newValue * 60 });
+            invoke("cmd_set_position", { position: 0 });
+            playerStateDispatch({ type: 'duration', payload: newValue * 60 });
+            playerStateDispatch({ type: 'position', payload: 0 });
         }
     };
 
     const handleLoopedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         let newLooped = event.target.checked;
         invoke("cmd_set_looping", { looping: newLooped });
-        setPlayerState(generateFromLooped(playerState, newLooped));
+        playerStateDispatch({ type: 'looped', payload: newLooped });
     };
 
     return (
@@ -47,7 +46,7 @@ export const PlayerDrawer = () => {
         }
       }}
       open={playerState.drawed}
-      onClose={() => {setPlayerState(generateFromDrawed(playerState, false))}}
+      onClose={() => {playerStateDispatch({ type: 'drawed', payload: false })}}
       sx={{backgroundColor: 'rgba(0, 0, 0, 0.1)', alignItems: 'center' }}
       >
         <Typography gutterBottom>
