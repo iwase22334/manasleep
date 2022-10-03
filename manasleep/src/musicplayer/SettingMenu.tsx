@@ -18,7 +18,14 @@ import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPause
 export const PlayerDrawer = () => {
     const {playerState, playerStateDispatch} = React.useContext(PlayerContext);
 
-    const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    const handleIntervalChange = (event: Event, newValue: number | number[]) => {
+        if (typeof newValue === 'number') {
+            invoke("cmd_set_interval", { interval: newValue });
+            playerStateDispatch({ type: 'interval', payload: newValue });
+        }
+    };
+
+    const handleDurationChange = (event: Event, newValue: number | number[]) => {
         if (typeof newValue === 'number') {
             invoke("cmd_set_duration", { duration: newValue * 60 });
             invoke("cmd_set_position", { position: 0 });
@@ -50,6 +57,21 @@ export const PlayerDrawer = () => {
       sx={{backgroundColor: 'rgba(0, 0, 0, 0.1)', alignItems: 'center' }}
       >
         <Typography gutterBottom>
+        読み上げ間隔(秒)
+        </Typography>
+        <Box sx={{ width: 250, display: 'flex' }}>
+          <Slider
+            size="small"
+            aria-label="duration"
+            defaultValue={ (playerState.interval ) }
+            valueLabelDisplay="auto"
+            onChange={handleIntervalChange}
+            min={3}
+            max={180}
+          />
+        </Box>
+
+        <Typography gutterBottom>
         再生時間(分)
         </Typography>
         <Box sx={{ width: 250, display: 'flex' }}>
@@ -59,7 +81,7 @@ export const PlayerDrawer = () => {
             aria-label="duration"
             defaultValue={ (playerState.duration / 60) }
             valueLabelDisplay="auto"
-            onChange={handleSliderChange}
+            onChange={handleDurationChange}
             step={5}
             marks
             min={5}
@@ -67,6 +89,7 @@ export const PlayerDrawer = () => {
           />
         </Box>
 
+        <Box sx={{ width: 250, display: 'flex' }}>
         <FormControlLabel
           value="end"
           control={<Checkbox
@@ -77,6 +100,7 @@ export const PlayerDrawer = () => {
           label="ループ再生"
           labelPlacement="end"
         />
+        </Box>
     </Drawer>
     )
 }

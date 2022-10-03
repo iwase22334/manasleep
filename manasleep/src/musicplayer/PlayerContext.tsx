@@ -9,6 +9,7 @@ export type PlayerState = {
     looped: boolean,
     drawed: boolean,
     duration: number,
+    interval: number,
     position: number,
     volume: number,
     paused: boolean
@@ -18,6 +19,7 @@ export type ActionType =
 | {type: "looped", payload: boolean}
 | {type: "drawed", payload: boolean}
 | {type: "duration", payload: number}
+| {type: "interval", payload: number}
 | {type: "position", payload: number}
 | {type: "volume", payload: number}
 | {type: "paused", payload: boolean};
@@ -31,6 +33,7 @@ const defaultState = {
     looped: false,
     drawed: false,
     duration: 1800, // second
+    interval: 10, // second
     position: 0,
     volume: 0,
     paused: true
@@ -82,6 +85,8 @@ export const reducerFunction = (state: PlayerState, action: ActionType) => {
                 return {...state, drawed: action.payload };
             case 'duration':
                 return {...state, duration: action.payload };
+            case 'interval':
+                return {...state, interval: action.payload };
             case 'position':
                 return {...state, position: action.payload };
             case 'volume':

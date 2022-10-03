@@ -29,6 +29,11 @@ fn cmd_set_duration(duration: u32, tx: tauri::State<mpsc::SyncSender<TickerContr
 }
 
 #[tauri::command]
+fn cmd_set_interval(interval: u32, tx: tauri::State<mpsc::SyncSender<TickerControl>>) {
+    ticker::set_interval(&tx, interval);
+}
+
+#[tauri::command]
 fn cmd_set_position(position: u32, tx: tauri::State<mpsc::SyncSender<TickerControl>>) {
     ticker::set_position(&tx, position);
 }
@@ -91,6 +96,7 @@ fn main() {
             tauri::generate_handler![
                 cmd_set_playing,
                 cmd_set_duration,
+                cmd_set_interval,
                 cmd_set_position,
                 cmd_set_looping,
                 cmd_set_volume,
