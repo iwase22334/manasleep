@@ -26,7 +26,7 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
         = mpsc::sync_channel::<TickerStateNotice>(1);
 
     let tick = Duration::from_millis(1000);
-    let mut active_duration = Duration::from_millis(1000 * 60 * 30);
+    let mut active_duration = Duration::from_millis(1000 * 60 * 45);
     let mut interval = Duration::from_millis(10000);
     let mut position = Duration::from_millis(0);
     let mut play_position = Duration::from_millis(0);
@@ -85,17 +85,17 @@ pub fn start(sound_control: mpsc::SyncSender<SoundControl>)
                         playing = false;
                         state_notice_tx.try_send(TickerStateNotice::Stopped)
                             .unwrap_or_else(|_| {println!("Failed to try_send Stopped")});
-                    } else {
-                        position = Duration::from_millis(0);
                     }
-                }
 
-                play_position += tick;
+                    position = Duration::from_millis(0);
+                }
 
                 state_notice_tx.try_send(
                     TickerStateNotice::PositionUpdate(
                         position.as_secs().try_into().unwrap()))
                             .unwrap_or_else(|_| {println!("Failed to try_send PositionUpdate")});
+
+                play_position += tick;
 
                 if play_position >= interval {
                     sound_control.send(SoundControl::Play).expect("Failed to send play");

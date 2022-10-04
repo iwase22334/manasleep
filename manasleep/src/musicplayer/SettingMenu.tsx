@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import MuiInput from '@mui/material/Input';
 import VolumeUp from '@mui/icons-material/VolumeUp';
-import {PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition} from './PlayerContext';
+import {PlayerContext} from './PlayerContext';
 
 export const PlayerDrawer = () => {
     const {playerState, playerStateDispatch} = React.useContext(PlayerContext);

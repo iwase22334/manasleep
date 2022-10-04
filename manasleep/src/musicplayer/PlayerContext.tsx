@@ -32,47 +32,11 @@ type PlayerStateContext = {
 const defaultState = {
     looped: false,
     drawed: false,
-    duration: 1800, // second
+    duration: 2700, // second
     interval: 10, // second
     position: 0,
     volume: 0,
     paused: true
-}
-
-export const generateFromLooped = (state: PlayerState, value: boolean) => {
-    let newPlayerState = { ...state };
-    newPlayerState.looped = value;
-    return newPlayerState;
-}
-
-export const generateFromDrawed = (state: PlayerState, value: boolean) => {
-    let newPlayerState = { ...state };
-    newPlayerState.drawed = value;
-    return newPlayerState;
-}
-
-export const generateFromDuration = (state: PlayerState, value: number) => {
-    let newPlayerState = { ...state };
-    newPlayerState.duration = value;
-    return newPlayerState;
-}
-
-export const generateFromPosition = (state: PlayerState, value: number) => {
-    let newPlayerState = { ...state };
-    newPlayerState.position = value;
-    return newPlayerState;
-}
-
-export const generateFromVolume = (state: PlayerState, value: number) => {
-    let newPlayerState = { ...state };
-    newPlayerState.volume = value;
-    return newPlayerState;
-}
-
-export const generateFromPaused = (state: PlayerState, value: boolean) => {
-    let newPlayerState = { ...state };
-    newPlayerState.paused = value;
-    return newPlayerState;
 }
 
 export const reducerFunction = (state: PlayerState, action: ActionType) => {

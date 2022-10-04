@@ -20,7 +20,7 @@ import Fab from '@mui/material/Fab'
 import VolumeUpRounded from '@mui/icons-material/VolumeUpRounded';
 import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
 
-import {PlayerState, PlayerContext, generateFromDrawed, generateFromLooped, generateFromPaused, generateFromDuration, generateFromPosition, generateFromVolume} from './PlayerContext';
+import {PlayerState, PlayerContext} from './PlayerContext';
 
 import jacket from '../assets/jacket.png'
 
