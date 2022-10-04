@@ -188,7 +188,7 @@ export default function MusicPlayerSlider() {
           <VolumeDownRounded htmlColor={lightIconColor} />
           <Slider
             aria-label="Volume"
-            defaultValue={30}
+            defaultValue={playerState.volume}
             onChange={handleVolumeChange}
             sx={{
               '& .MuiSlider-track': {

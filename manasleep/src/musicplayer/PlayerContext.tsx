@@ -35,7 +35,7 @@ const defaultState = {
     duration: 2700, // second
     interval: 10, // second
     position: 0,
-    volume: 0,
+    volume: 100,
     paused: true
 }
 
