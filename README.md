@@ -1,6 +1,17 @@
 
 ## 音声生成
-for word in $(cat ../wordlist/all.txt); do ps1 python3.exe ../script/request-audio-generate.py $word; done
+
+### 話者取得
+
+ps1 python3 ./script/request-speaker.py | jq . >> script/request-speaker-response.txt
+
+### リクエスト生成
+
+for word in $(cat ../wordlist/v2/japanese-word.txt | shuf | head -n 256); do ps1 python3.exe ../script/01-request-audio-query-generate.py 43 $word | tee ../wip/43_$word.json ; done
+
+### ボイス生成
+
+for file in $(find ../wip/* -type f -name '*.json') ; do ps1 python3.exe 02-request-audio.py 43 ${file%.*} $file ; done
 
 ## 参考
 - https://ranking.net/shopping/food

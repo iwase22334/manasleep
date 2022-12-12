@@ -1,1 +1,151 @@
 [{"name": "\u3064\u304f\u3088\u307f\u3061\u3083\u3093", "speaker_uuid": "3c37646f-3881-5374-2a83-149267990abc", "styles": [{"name": "\u308c\u3044\u305b\u3044", "id": 0}], "version": "0.0.1"}, {"name": "MANA", "speaker_uuid": "292ea286-3d5f-f1cc-157c-66462a6a9d08", "styles": [{"name": "\u306e\u30fc\u307e\u308b", "id": 1}, {"name": "\u3044\u3063\u3057\u3087\u3046\u3051\u3093\u3081\u3044", "id": 7}, {"name": "\u3054\u304d\u3052\u3093", "id": 40}], "version": "1.1.0"}, {"name": "KANA", "speaker_uuid": "297a5b91-f88a-6951-5841-f1e648b2e594", "styles": [{"name": "\u306e\u30fc\u307e\u308b", "id": 30}, {"name": "\u3048\u3093\u3052\u304d", "id": 31}], "version": "1.0.2"}, {"name": "MANA+", "speaker_uuid": "2932eb06-e388-45bf-a6ba-dbc66a48961e", "styles": [{"name": "\u3075\u304f\u308c\u3063\u3064\u3089", "id": 41}, {"name": "\u3057\u3087\u3093\u307c\u308a", "id": 42}], "version": "1.1.0"}]
+[
+  {
+    "name": "つくよみちゃん",
+    "speaker_uuid": "3c37646f-3881-5374-2a83-149267990abc",
+    "styles": [
+      {
+        "name": "れいせい",
+        "id": 0
+      },
+      {
+        "name": "おしとやか",
+        "id": 5
+      },
+      {
+        "name": "げんき",
+        "id": 6
+      }
+    ],
+    "version": "1.0.0"
+  },
+  {
+    "name": "MANA",
+    "speaker_uuid": "292ea286-3d5f-f1cc-157c-66462a6a9d08",
+    "styles": [
+      {
+        "name": "のーまる",
+        "id": 1
+      },
+      {
+        "name": "いっしょうけんめい",
+        "id": 7
+      },
+      {
+        "name": "ごきげん",
+        "id": 40
+      }
+    ],
+    "version": "1.1.0"
+  },
+  {
+    "name": "おふとんP",
+    "speaker_uuid": "a60ebf6c-626a-7ce6-5d69-c92bf2a1a1d0",
+    "styles": [
+      {
+        "name": "のーまるv2",
+        "id": 2
+      },
+      {
+        "name": "よろこび",
+        "id": 21
+      },
+      {
+        "name": "かなしみ",
+        "id": 9
+      },
+      {
+        "name": "あせり",
+        "id": 20
+      },
+      {
+        "name": "ささやき",
+        "id": 22
+      },
+      {
+        "name": "ナレーション",
+        "id": 8
+      }
+    ],
+    "version": "1.2.0"
+  },
+  {
+    "name": "KANA",
+    "speaker_uuid": "297a5b91-f88a-6951-5841-f1e648b2e594",
+    "styles": [
+      {
+        "name": "のーまる",
+        "id": 30
+      },
+      {
+        "name": "えんげき",
+        "id": 31
+      }
+    ],
+    "version": "1.0.2"
+  },
+  {
+    "name": "MANA+",
+    "speaker_uuid": "2932eb06-e388-45bf-a6ba-dbc66a48961e",
+    "styles": [
+      {
+        "name": "ふくれっつら",
+        "id": 41
+      },
+      {
+        "name": "しょんぼり",
+        "id": 42
+      },
+      {
+        "name": "ないしょばなし",
+        "id": 43
+      }
+    ],
+    "version": "1.2.0"
+  },
+  {
+    "name": "伊能いお",
+    "speaker_uuid": "7411b244-483d-11ed-be5b-0242ac1c0002",
+    "styles": [
+      {
+        "name": "ふつう",
+        "id": 38195345
+      },
+      {
+        "name": "ロリ関西",
+        "id": 38195346
+      }
+    ],
+    "version": "1.1.0"
+  },
+  {
+    "name": "あみたろ",
+    "speaker_uuid": "d93140ec-d365-11ec-8f1d-0242ac1c0002",
+    "styles": [
+      {
+        "name": "のーまるv4",
+        "id": 304122960
+      },
+      {
+        "name": "穏やか",
+        "id": 304122957
+      }
+    ],
+    "version": "0.0.1"
+  },
+  {
+    "name": "お星",
+    "speaker_uuid": "f56db9a0-f531-11ec-be4e-0242ac1c0002",
+    "styles": [
+      {
+        "name": "テンション↑↑",
+        "id": 1763904139
+      },
+      {
+        "name": "はきはき",
+        "id": 1096069403
+      }
+    ],
+    "version": "0.0.1"
+  }
+]
