@@ -43,7 +43,8 @@ if __name__ == "__main__":
     # }
 
     # sentence = sys.stdin.readline().rstrip('\n')
-    sentence = sys.argv[1]
-    response = request_audio(sentence, "42")
-    with open(f"{sentence}.wav", "wb") as file:
+    speaker = sys.argv[1]
+    sentence = sys.argv[2]
+    response = request_audio(sentence, speaker)
+    with open(f"{speaker}_{sentence}.wav", "wb") as file:
         file.write(response.content)
