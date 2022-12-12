@@ -11,7 +11,7 @@ for word in $(cat ../wordlist/v2/japanese-word.txt | shuf | head -n 256); do ps1
 
 ### ボイス生成
 
-for file in $(find ../wip/* -type f -name '*.json') ; do ps1 python3.exe 02-request-audio.py 43 ${file%.*} $file ; done
+for file in $(find * -type f -name '*.json') ; do ps1 python3.exe ../script/02-request-audio.py 43 ${file%.*} $file ; done
 
 ## 参考
 - https://ranking.net/shopping/food
